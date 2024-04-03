@@ -20,7 +20,7 @@ clientSecret = os.getenv("CLIENT_SECRET")
 jwt = os.getenv("JWT")
 
 # Construct Workspace Integration connection
-connection = Webex(clientId, clientSecret, jwt, True)
+connection = Webex(clientId, clientSecret, jwt)
 
 # Get Access Token and Activate Integration
 connection.getAccessToken()

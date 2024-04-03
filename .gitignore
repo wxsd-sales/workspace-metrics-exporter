@@ -1594,3 +1594,6 @@ FodyWeavers.xsd
 /build
 /package
 node_modules
+
+
+/exports

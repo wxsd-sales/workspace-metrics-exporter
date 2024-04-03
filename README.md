@@ -1,70 +1,108 @@
 
 # Workspace Metrics Exporter
 
-This is a example script for exporting historical metrics from all Workspaces on a Webex Org
+This example Python script shows how to export historical workspace metrics from all Workspaces on a Webex Org. 
 
 
 ## Overview
 
-Go into detail about the implementation.   3-4 Sentences
-**HOW** the implementation works. You need not give end-to-end details but an overview.
+This script leverages a Webex Workspace Integration and its Access Token to query all Workspaces in your Webex Org using list Workspaces Webex REST API.
 
+https://developer.webex.com/docs/api/v1/workspaces/list-workspaces
 
+Next, using the obtained Workspaces Id the script will then query each workspaces historical metrics using the Workspace Metrics API.
 
-### Flow Diagram
+https://developer.webex.com/docs/api/v1/workspace-metrics/workspace-metrics
 
-<!-- *MANDATORY*  Insert Your Flow Diagram Here (if small PoC, alternative option is to include break down how it works here instead of diagram) -->
-![image/gif](insert img link here)
-
+Lastly, once all Workspace Metrics have been collected, the script saves the exported data as single CSV file.
 
 
 ## Setup
 
 ### Prerequisites & Dependencies: 
 
-- Is this dependant on having another repo
-- Insert pre-requisites in bullets
-- Insert pre-requisite here  Also state any assumptions that you may have made about the user.
-- Limit nested bullets
-
+- Webex Org Admin Access
+- Python version >= 3.8
+- Pip install modules
 
 <!-- GETTING STARTED -->
 
-### Installation Steps:
-1.  Include step one here
-    ```sh
-    insert line of code here if applicable
+### Workspace Integration Setup:
+
+1. Using the Workspace Integration builder tool, create a new manifest file and give it a name and description
+    https://cisco-ce.github.io/workspace-integrations-editor/
+    ![New Workspace Integration](images/image-01.png)
+
+2. Give your integration the following access scopes and delete any other auto populated scopes:
     ```
-2.  Insert step two here
-    Insert screenshot, if applicable
+    spark-admin:workspaces_read
+    spark-admin:workspace_metrics_read
+    ```
+    ![Scopes Tab and Fields](images/image-02.png)
+
+3. Delete all xAPI scopes as these are not required for this script
+    ![xAPI Tab and pointing to fields in which to delete](images/image-03.png)
+    ![xAPI Tab with fields deleted](images/image-04.png)
+
+4. Export and save the manifest file:
+    ![Export and save](images/image-05.png)
+
+5. On your Webex Org Control Hub. Go to Workspaces -> Integrations and click ``Add Integration`` and then ``Upload Integration``:
+![alt text](images/image-06.png)
+
+6. Select the manifest file you created earlier and click upload
+    ![alt text](images/image-07.png)
+
+7. Save a copy of the Client ID and Secret (required for the script) and the click ``Go To Integration``
+    ![alt text](images/image-08.png)
+
+8. On the Workspace Metrics integration page, click ``Actions`` and then click ``Activate``
+   ![alt text](images/image-09.png)
+
+9. Review the permissions and then click ``Activate``
+![alt text](images/image-10.png)
+
+10. Save a copy of the JSON Web Token (JWT) (required for the script)
+![alt text](images/image-11.png)
+
+
+### Installation Steps:
+1.  Close this repo:
+    ```sh
+    git clone https://github.com/wxsd-sales/workspace-metrics-exporter.git
+    ```
+2.  Insert project requirements:
+    ```sh
+    pip3 install -r requirements.txt
+    ```
+3. Rename ``.env.example`` to ``.env`` and add your Workspace Integration Client ID, Secret & JSON Web Token (JWT)
+    ```
+    CLIENT_ID=""
+    CLIENT_SECRET=""
+    JWT=""
+    ```
+4. Run the script using:
+    ```sh
+    python3 main.py
+    ```
+5. (Optional) Setup a Cron job ( Linux ), Automator Task ( Mac)  or Scheduled Task ( Windows ) to periodically run this script and export your Workspace metrics on a daily bases
     
     
     
 ## Demo
 
-<!-- Insert link to the website below (if deployed). -->
-Check out our live demo, available [here](<insert link>)!
-
-<!-- Keep the following statement -->
 *For more demos & PoCs like this, check out our [Webex Labs site](https://collabtoolbox.cisco.com/webex-labs).
 
 
-<!-- Update your vidcast title, video screenshot, vidcast/youtube link & name -->
-[![Your Video Title ](assets/peer_support_main.PNG)](https://www.youtube.com/watch?v=SqZhiC8jHhU&t=10s, "<insert demo name here>")
-
-
-
 ## License
-<!-- MAKE SURE an MIT license is included in your Repository. If another license is needed, verify with management. This is for legal reasons.--> 
 
-<!-- Keep the following statement -->
 All contents are licensed under the MIT license. Please see [license](LICENSE) for details.
 
 
 ## Disclaimer
-<!-- Keep the following here -->  
- Everything included is for demo and Proof of Concept purposes only. Use of the site is solely at your own risk. This site may contain links to third party content, which we do not warrant, endorse, or assume liability for. These demos are for Cisco Webex usecases, but are not Official Cisco Webex Branded demos.
+  
+ Everything included is for demo and Proof of Concept purposes only. Use of the site is solely at your own risk. This site may contain links to third party content, which we do not warrant, endorse, or assume liability for. These demos are for Cisco Webex use cases, but are not Official Cisco Webex Branded demos.
 
 
 ## Questions
-Please contact the WXSD team at [wxsd@external.cisco.com](mailto:wxsd@external.cisco.com?subject=RepoName) for questions. Or, if you're a Cisco internal employee, reach out to us on the Webex App via our bot (globalexpert@webex.bot). In the "Engagement Type" field, choose the "API/SDK Proof of Concept Integration Development" option to make sure you reach our team. 
+Please contact the WXSD team at [wxsd@external.cisco.com](mailto:wxsd@external.cisco.com?subject=workspace-metrics-exporter) for questions. Or, if you're a Cisco internal employee, reach out to us on the Webex App via our bot (globalexpert@webex.bot). In the "Engagement Type" field, choose the "API/SDK Proof of Concept Integration Development" option to make sure you reach our team. 

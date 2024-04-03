@@ -105,7 +105,7 @@ Lastly, once all Workspace Metrics have been collected, the script saves the exp
     
 ## Demo
 
-Check out our live demo, available [here](https://app.vidcast.io/share/embed/c95e524a-43e4-4ffe-a5c6-d8654ed98da3)!
+Check out our live demo, available [here](https://app.vidcast.io/share/c95e524a-43e4-4ffe-a5c6-d8654ed98da3)!
 
 *For more demos & PoCs like this, check out our [Webex Labs site](https://collabtoolbox.cisco.com/webex-labs).
 

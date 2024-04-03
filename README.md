@@ -67,6 +67,7 @@ Lastly, once all Workspace Metrics have been collected, the script saves the exp
 
 
 ### Installation Steps:
+
 1.  Close this repo:
     ```sh
     git clone https://github.com/wxsd-sales/workspace-metrics-exporter.git
@@ -85,6 +86,7 @@ Lastly, once all Workspace Metrics have been collected, the script saves the exp
     ```sh
     python3 main.py
     ```
+    Once completed, exports are saved to the exports folder with the filename ``workspace-metrics-datetime.csv``
 5. (Optional) Setup a Cron job ( Linux ), Automator Task ( Mac)  or Scheduled Task ( Windows ) to periodically run this script and export your Workspace metrics on a daily bases
     
     

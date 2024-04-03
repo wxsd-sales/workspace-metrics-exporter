@@ -18,13 +18,14 @@ class Webex:
         
 
     def getAccessToken(self):
-
+        
         payload = json.dumps({
         "grant_type": "refresh_token",
         "client_id": self.clientId,
         "client_secret": self.clientSecret,
         "refresh_token": self.refreshToken
         })
+        
         headers = {
         'Content-Type': 'application/json'
         }
@@ -32,6 +33,7 @@ class Webex:
         response = requests.request("POST", self.oauthUrl, headers=headers, data=payload)
 
         body = response.json()
+        print(body)
         self.accessToken = body['access_token']
 
 

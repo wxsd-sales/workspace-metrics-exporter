@@ -3,6 +3,7 @@
 
 This example Python script shows how to export historical workspace metrics from all Workspaces on a Webex Org. 
 
+![Simple flowchat showcasing exporter script](images/Workspace%20Metrics%20Exporter.png)
 
 ## Overview
 
@@ -29,8 +30,10 @@ Lastly, once all Workspace Metrics have been collected, the script saves the exp
 
 ### Workspace Integration Setup:
 
-1. Using the Workspace Integration builder tool, create a new manifest file and give it a name and description
+1. Using the Workspace Integration builder tool, create a new manifest file and give it a name and description:
+
     https://cisco-ce.github.io/workspace-integrations-editor/
+
     ![New Workspace Integration](images/image-01.png)
 
 2. Give your integration the following access scopes and delete any other auto populated scopes:
@@ -41,29 +44,38 @@ Lastly, once all Workspace Metrics have been collected, the script saves the exp
     ![Scopes Tab and Fields](images/image-02.png)
 
 3. Delete all xAPI scopes as these are not required for this script
+
     ![xAPI Tab and pointing to fields in which to delete](images/image-03.png)
+
     ![xAPI Tab with fields deleted](images/image-04.png)
 
 4. Export and save the manifest file:
+
     ![Export and save](images/image-05.png)
 
 5. On your Webex Org Control Hub. Go to Workspaces -> Integrations and click ``Add Integration`` and then ``Upload Integration``:
-![alt text](images/image-06.png)
+
+    ![Click on Upload Integration Button](images/image-06.png)
 
 6. Select the manifest file you created earlier and click upload
-    ![alt text](images/image-07.png)
+
+    ![Upload manifest file reveiw page](images/image-07.png)
 
 7. Save a copy of the Client ID and Secret (required for the script) and the click ``Go To Integration``
-    ![alt text](images/image-08.png)
+
+    ![Client ID and Secret displayed after uploading integration](images/image-08.png)
 
 8. On the Workspace Metrics integration page, click ``Actions`` and then click ``Activate``
-   ![alt text](images/image-09.png)
+
+   ![Clicking on the Activate button](images/image-09.png)
 
 9. Review the permissions and then click ``Activate``
-![alt text](images/image-10.png)
+
+    ![Review page and final activate button](images/image-10.png)
 
 10. Save a copy of the JSON Web Token (JWT) (required for the script)
-![alt text](images/image-11.png)
+
+    ![JSON Web Token page after activation](images/image-11.png)
 
 
 ### Installation Steps:

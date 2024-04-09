@@ -1,16 +1,29 @@
 
+import sys
 import os
 from datetime import datetime
 from dotenv import load_dotenv
 from scripts.webex import Webex
+from scripts.parameters import CONSOLE_ARGS
 from pathlib import Path
 
+
+args = CONSOLE_ARGS
+
+
+if(args.start > args.end):
+    sys.exit('To Timestamp can\'t be greater than the From timestamp')
+
+# sys.exit('Finished')
+
+
+print(args)
 
 load_dotenv()
 
 # Create export filename and directory
-reportDataTime = datetime.now().strftime('%Y-%m-%d-%H:00:00')
-output_file = 'workspace-metrics-'+reportDataTime+'.csv'
+reportDataTime = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+output_file = 'workspace-metrics-'+args.metricName+'-'+args.value+'-'+reportDataTime+'.csv'
 output_dir = Path('./exports')
 output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -20,7 +33,7 @@ clientSecret = os.getenv("CLIENT_SECRET")
 jwt = os.getenv("JWT")
 
 # Construct Workspace Integration connection
-connection = Webex(clientId, clientSecret, jwt)
+connection = Webex(clientId, clientSecret, jwt, args.debug)
 
 # Get Access Token and Activate Integration
 connection.getAccessToken()
@@ -32,7 +45,7 @@ workspaces = connection.listWorkspaces()
 print('Number of Workspaces found:', len(workspaces) )
 
 # Get Metrics for all workspaces
-report = connection.getMetrics(workspaces, 'peopleCount', 'hourly')
+report = connection.getMetrics(workspaces, args.metricName, args.start, args.end, args.aggregation, args.value)
 
 
 print('Saving Export to:', output_dir / output_file )

@@ -3,10 +3,11 @@ from datetime import datetime, timedelta
 import pandas as pd
 import json
 import jwt
+import sys
 
 class Webex:
 
-    def __init__(self, clientId, clientSecret, workspaceIntegrationJwt, debug=False):
+    def __init__(self, clientId, clientSecret, workspaceIntegrationJwt, debug=True):
         self.clientId = clientId
         self.clientSecret = clientSecret
         self.workspaceIntegrationJwt = workspaceIntegrationJwt
@@ -33,8 +34,17 @@ class Webex:
         response = requests.request("POST", self.oauthUrl, headers=headers, data=payload)
 
         body = response.json()
-        print(body)
-        self.accessToken = body['access_token']
+
+        if (self.debug):
+            print('Access Token Response:')
+            print(body)
+        
+        if 'access_token' in body:
+            self.accessToken = body['access_token']
+            print('Access Token Generated')
+        else: 
+            sys.exit('Error getting Access Token')
+
 
 
 
@@ -64,15 +74,17 @@ class Webex:
         return  body['items']
 
 
-    def getMetrics(self, workspaces, metricName='peopleCount', aggregation='hourly' ):
+    def getMetrics(self, workspaces, metricName='peopleCount', start= datetime.now(), end= datetime.now()- timedelta(hours=24), aggregation='hourly', value='duration'):
+
+        print('Getting '+ metricName+ ' Metrics - Aggregation: '+ aggregation + ' - Value: ' + value)
 
         df = pd.DataFrame(columns=['Workspace Name','Workspace Id'])
-        toDate = datetime.now()
-        fromDate =  toDate - timedelta(hours=24)
+        # toDate = datetime.now()
+        # fromDate =  toDate - timedelta(hours=24)
 
         for workspace in workspaces:
             print('Getting metrics for '+ workspace['displayName'])
-            data = self.getWorkspaceMetrics(workspace['id'], metricName, aggregation, toDate.strftime('%Y-%m-%dT%H:00:00Z'), fromDate.strftime('%Y-%m-%dT%H:00:00Z'))
+            data = self.getWorkspaceMetrics(workspace['id'], metricName, aggregation, start.strftime('%Y-%m-%dT%H:00:00Z'), end.strftime('%Y-%m-%dT%H:00:00Z'), value)
             
             row = {
                 "Workspace Name": workspace['displayName'],
@@ -85,9 +97,14 @@ class Webex:
             
         
 
-    def getWorkspaceMetrics(self, workspaceId, metricName, aggregation, toDate, fromDate, value='max'):
+    def getWorkspaceMetrics(self, workspaceId, metricName, aggregation, start, end, value='max'):
 
-        url = 'https://webexapis.com/v1/workspaceMetrics?workspaceId='+ workspaceId +'&metricName='+metricName+'&aggregation='+aggregation+'&from='+fromDate+'&to='+toDate+'&sortBy=oldestFirst'
+        endpoint = 'workspaceMetrics'
+
+        if (metricName == 'timeused' or metricName == 'timebooked'):
+            endpoint = 'workspaceDurationMetrics'
+
+        url = 'https://webexapis.com/v1/'+endpoint+'?workspaceId='+ workspaceId +'&metricName='+metricName+'&aggregation='+aggregation+'&from='+start+'&to='+end
         
         if (self.debug):
             print('Making Query: ' + url)
@@ -102,7 +119,11 @@ class Webex:
         body = response.json()
         data = {}
 
+        if 'message' in body:
+            sys.exit('Error: ' +body['message'])
+
         if (self.debug):
+            print(response.json())
             print('Returned Data for Workspace:')
             print(body['items'])
 

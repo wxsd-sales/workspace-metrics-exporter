@@ -25,7 +25,7 @@ def _add_sub_arguments(parser: argparse.ArgumentParser):
 
 def _add_buckets(parser: argparse.ArgumentParser):
     parser.add_argument('-v', '--value', dest='value', choices=['mean', 'max', 'min'],  default='max',
-                        help='Values you want to store')
+                        help='Value you want to store')
     
 
 
@@ -33,10 +33,8 @@ def _parse_arguments():
     parser = argparse.ArgumentParser(prog='UCM_Updater', 
                                  description='This Scripts lets you bulk export Workspace Metrics for your Webex Org')
 
-    subparsers = parser.add_subparsers(dest='metricName', title='Metric Name', description='The type of data to extract.',
-                                        help="asdf", required=True)
+    subparsers = parser.add_subparsers(dest='metricName', help="asdf", description='The type of data to extract.',required=True)
     
-
     parser_soundLevel = subparsers.add_parser('soundlevel', help='Estimated averaged sound level in the workspace')
     parser_ambientNoise = subparsers.add_parser('ambientnoise', help='Estimated stationary ambient noise level in the workspace (background noise level)')
     parser_temperature = subparsers.add_parser('temperature', help='Ambient temperature in the workspace')
@@ -67,76 +65,14 @@ def _parse_arguments():
     _add_buckets(parser_peopleCount)
 
     parser_timeUsed.add_argument('-v', '--value', dest='value', action='store_const', const='duration', default='duration',
-                        help='To Time ISO 2024-04-09T17:21:00Z')
+                        help='Value you want to store - default = duration')
     parser_timeBooked.add_argument('-v', '--value', dest='value', action='store_const', const='duration', default='duration',
-                        help='To Time ISO 2024-04-09T17:21:00Z')
+                        help='Value you want to store - default = duration')
 
-
-
-    # parser.add_argument('type', choices=['metrics', 'durationmetrics'])
 
     return parser.parse_args()
 
 
-    subparsers = parser.add_subparsers(dest='command', required=True)
-
-    parser_survey = subparsers.add_parser('survey', help='Identify mislabeled Speed Dials and genearte a report')
-
-    parser_survey.add_argument('-d', '--debug', dest='debug', action='store_true', default=False,
-                        help='Show debug logs')
-
-    parser_survey.add_argument('--debug-soap', dest='soapDebug', action='store_true', default=False,    
-                        help='Show SOAP Debug Logs')
-
-    parser_survey.add_argument('--min-digits', dest='minDigits', action='store_const', const=4, default=4,
-                        help='Minimum number of Speed Dial Digits which will be updated (default: 4)')
-
-    parser_survey.add_argument('--max-digits', dest='maxDigits', action='store_const', const=4, default=4,
-                        help='Maximum number of Speed Dial Digits which will be updated (default: 4)')
-
-    parser_survey.add_argument('--replacement-token', dest='replacementToken', action='store_const', const='N/A', default='N/A',
-                        help='Text to replace unfound Speed Dial Extensions (default: \'N/A\')')
-
-    parser_update = subparsers.add_parser('update', help='Identify mislabeled Speed Dials and update them')
-
-    parser_update.add_argument('-f','--force', dest='forceUpdate', action='store_true',
-                        help='Perform Speed Dial updates without confirmation prompt')
-    
-    parser_update.add_argument('-d', '--debug', dest='debug', action='store_true', default=False,
-                        help='Show debug logs')
-    
-    parser_update.add_argument('--debug-soap', dest='soapDebug', action='store_true', default=False,
-                        help='Show SOAP Debug Logs')
-
-    parser_update.add_argument('--min-digits', dest='minDigits',  default=4, type=int,
-                        help='Minimum number of Speed Dial Digits which will be updated (default: 4)')
-    parser_update.add_argument('--max-digits', dest='maxDigits',  default=4, type=int,
-                        help='Maximum number of Speed Dial Digits which will be updated (default: 4)')
-
-    parser_update.add_argument('--replacement-token', dest='replacementToken', action='store_const', const='N/A', default='N/A',
-                        help='Text to replace unfound Speed Dial Extensions (default: \'N/A\')')
-
-    parser_restore = subparsers.add_parser('restore', help='Restore Speed Dials from Backup')
-
-    parser_restore.add_argument(dest='filename',  type=argparse.FileType('r'), help='Speed Dials Backup Filename')
-
-    #parser_restoreFile = filesubparsers.add_argument('filename', type=argparse.FileType('r'), help='Speed Dials Backup Filename')
-
-    #parser_restoreFile.add_argument('filename', dest='forceUpdate', action='store_true',
-    #                    help='Perform Speed Dial restore without confirmation prompt')
-
-    parser_restore.add_argument('-f', '--force', dest='forceUpdate', action='store_true',
-                        help='Perform Speed Dial restore without confirmation prompt')
-    
-    parser_restore.add_argument('-d', '--debug', dest='debug', action='store_true', default=False,
-                        help='Show debug logs')
-    
-    parser_restore.add_argument('--debug-soap', dest='soapDebug', action='store_true', default=False,
-                        help='Show SOAP Debug Logs')
-
- 
-
-    return parser.parse_args()
 
 CONSOLE_ARGS =  _parse_arguments()
 

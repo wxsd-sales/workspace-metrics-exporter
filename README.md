@@ -96,10 +96,37 @@ Lastly, once all Workspace Metrics have been collected, the script saves the exp
     ```
 4. Run the script using:
     ```sh
-    python3 main.py
+    python3 workspace.py temperature -f 2024-04-09T19:21:00Z -t 2024-04-10T17:21:00Z
     ```
     Once completed, exports are saved to the exports folder with the filename ``workspace-metrics-datetime.csv``
-5. (Optional) Setup a Cron job ( Linux ), Automator Task ( Mac)  or Scheduled Task ( Windows ) to periodically run this script and export your Workspace metrics on a daily bases
+
+5. You can use the ``-h`` parameter to list of all supported meteric names and additional parameters to get any metric data for supported time ranges, intervals etc.
+    ```sh
+    python3 workspace.py -h
+
+    usage: workspace.py [-h] {soundlevel,ambientnoise,temperature,humidity,tvoc,peoplecount,timeused,timebooked} ...
+
+    This Scripts lets you bulk export Workspace Metrics for your Webex Org
+
+    options:
+    -h, --help            show this help message and exit
+
+    subcommands:
+    The metric name you want to export
+
+    {soundlevel,ambientnoise,temperature,humidity,tvoc,peoplecount,timeused,timebooked}
+                        asdf
+    soundlevel          Estimated averaged sound level in the workspace
+    ambientnoise        Estimated stationary ambient noise level in the workspace (background noise level)
+    temperature         Ambient temperature in the workspace
+    humidity            Relative humidity in the workspace
+    tvoc                (Total Volatile Organic Compounds) - Indoor Air Quality
+    peoplecount         Number of detected people in the workspace
+    timeused            Duration for which the workspace has been used
+    timebooked          Duration for which the workspace has been booked
+    ```
+
+6. (Optional) Setup a Cron job ( Linux ), Automator Task ( Mac)  or Scheduled Task ( Windows ) to periodically run this script and export your Workspace metrics on a daily bases
     
     
     

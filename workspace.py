@@ -1,21 +1,15 @@
-
-import sys
-import os
 from datetime import datetime
 from dotenv import load_dotenv
 from scripts.webex import Webex
 from scripts.parameters import CONSOLE_ARGS
 from pathlib import Path
-
+import sys
+import os
 
 args = CONSOLE_ARGS
 
-
 if(args.start > args.end):
     sys.exit('To Timestamp can\'t be greater than the From timestamp')
-
-# sys.exit('Finished')
-
 
 print(args)
 
@@ -40,14 +34,27 @@ connection.getAccessToken()
 connection.activateIntegration()
 
 # Query all Workspaces in Webex Org
-workspaces = connection.listWorkspaces()
+workspaces = connection.listAllWorkspaces('collaborationDevices')
 
 print('Number of Workspaces found:', len(workspaces) )
 
+report = connection.getWorkspaceMetrics(workspaces, args)
+
+
+
+print('Saving Export to:', output_dir / output_file )
+# Save Export to CSV file
+report.to_csv(output_dir / output_file, index=False)  
+
+sys.exit('Finished')
+
+
+# sys.exit('Finished')
 # Get Metrics for all workspaces
 report = connection.getMetrics(workspaces, args.metricName, args.start, args.end, args.aggregation, args.value)
 
 
+sys.exit('Finished')
 print('Saving Export to:', output_dir / output_file )
 # Save Export to CSV file
 report.to_csv(output_dir / output_file, index=False)  

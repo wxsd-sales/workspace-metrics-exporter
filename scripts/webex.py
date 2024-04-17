@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
 import requests
@@ -54,7 +53,7 @@ class Webex(object):
         else:
             sys.exit('Failed to Activate Workspace Integration - Error Code: ' + str(response.status_code))
 
-        
+       
 
     def listAllWorkspaces(self, supportedDevices='collaborationDevices') -> list:
         print('Discovery all Workspaces in Webex Org')

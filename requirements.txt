@@ -1,5 +1,5 @@
 pyjwt
-dotenv
+python-dotenv
 python-dateutil
-json
+requests
 pandas

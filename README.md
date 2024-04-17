@@ -25,6 +25,7 @@ Lastly, once all Workspace Metrics have been collected, the script saves the exp
 - Webex Org Admin Access
 - Python version >= 3.8
 - Pip install modules
+- Network Access to reach Webex APIs at domain: ``https://webexapis.com``
 
 <!-- GETTING STARTED -->
 

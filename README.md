@@ -81,7 +81,7 @@ Lastly, once all Workspace Metrics have been collected, the script saves the exp
 
 ### Installation Steps:
 
-1.  Close this repo:
+1.  Clone this repo:
     ```sh
     git clone https://github.com/wxsd-sales/workspace-metrics-exporter.git
     ```

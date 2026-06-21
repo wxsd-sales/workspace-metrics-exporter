@@ -33,7 +33,7 @@ def _parse_arguments():
     parser = argparse.ArgumentParser(prog='workspace.py', 
                                  description='This Scripts lets you bulk export Workspace Metrics for your Webex Org')
 
-    subparsers = parser.add_subparsers(dest='metricName', help="asdf", description='The metric name you want to export',required=True)
+    subparsers = parser.add_subparsers(dest='metricName', description='The metric name you want to export',required=True)
     
     parser_soundLevel = subparsers.add_parser('soundlevel', help='Estimated averaged sound level in the workspace')
     parser_ambientNoise = subparsers.add_parser('ambientnoise', help='Estimated stationary ambient noise level in the workspace (background noise level)')

@@ -1,10 +1,18 @@
 from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
 import requests
+import threading
+import random
 import time
 import json
 import jwt
 import sys
+
+# Retry / rate-limit tuning
+MAX_ATTEMPTS = 5            # total tries per request (covers repeated 429s and transient errors)
+BACKOFF_BASE = 1.0         # base seconds for exponential backoff on transient errors
+BACKOFF_MAX = 30.0         # cap on a single backoff sleep
+RETRYABLE_STATUS = {500, 502, 503, 504}
 
 class Webex(object):
 
@@ -17,6 +25,11 @@ class Webex(object):
         self.oauthUrl = self.jwtDecoded['oauthUrl']
         self.appUrl = self.jwtDecoded['appUrl']
         self.debug = debug
+
+        # Shared rate-limit gate used by all ThreadPoolExecutor workers.
+        # _rate_limit_until is a time.monotonic() timestamp; 0 = no active cooldown.
+        self._rate_limit_lock = threading.Lock()
+        self._rate_limit_until = 0.0
         
 
     def getAccessToken(self):
@@ -127,25 +140,63 @@ class Webex(object):
 
         return queries
 
-    def webexAPI(self, method, url, params=[], data={}) -> requests.Response:
-        
+    def _await_rate_limit(self):
+        # Block while a shared cooldown (set by a 429 on any thread) is active.
+        while True:
+            with self._rate_limit_lock:
+                wait = self._rate_limit_until - time.monotonic()
+            if wait <= 0:
+                return
+            time.sleep(wait)
+
+    def _trip_rate_limit(self, retry_after):
+        # Register a cooldown window shared by all threads. The longest
+        # Retry-After wins so no thread shortens another thread's window.
+        with self._rate_limit_lock:
+            self._rate_limit_until = max(
+                self._rate_limit_until, time.monotonic() + retry_after
+            )
+
+    def webexAPI(self, method, url, params=None, data={}) -> requests.Response:
+
         headers = {'Authorization': 'Bearer '  + self.accessToken}
-        
+
         if method in ['POST', 'PATCH']:
             headers['Content-Type'] = 'application/json'
 
-        while True:
+        for attempt in range(MAX_ATTEMPTS):
+            # Respect any cooldown currently in effect before sending.
+            self._await_rate_limit()
+
             try:
                 if (self.debug):
                     print('Making Webex API Call: ' + url)
                 response = requests.request(method, url, headers=headers, params=params, data=data)
-                if response.status_code == 429:
-                    print('Sleeping for ' + response.headers['Retry-After'] +' seconds')
-                    time.sleep(response.headers['Retry-After'])
-                else:
-                    break
-            except Exception as e:
+            except requests.RequestException as e:
+                # Network-level error: back off and retry.
                 print(e)
-                sys.exit('Error making Webex API Request')
-                
-        return response
+                if attempt == MAX_ATTEMPTS - 1:
+                    raise RuntimeError('Error making Webex API Request: ' + str(e))
+                backoff = min(BACKOFF_MAX, BACKOFF_BASE * (2 ** attempt)) + random.uniform(0, 1)
+                print('Request error, retrying in {} seconds'.format(round(backoff, 2)))
+                time.sleep(backoff)
+                continue
+
+            if response.status_code == 429:
+                retry_after = int(response.headers.get('Retry-After', BACKOFF_BASE))
+                print('Rate limited (429), pausing all requests for {} seconds'.format(retry_after))
+                self._trip_rate_limit(retry_after)
+                continue
+
+            if response.status_code in RETRYABLE_STATUS:
+                if attempt == MAX_ATTEMPTS - 1:
+                    return response
+                backoff = min(BACKOFF_MAX, BACKOFF_BASE * (2 ** attempt)) + random.uniform(0, 1)
+                print('Transient error ({}), retrying in {} seconds'.format(response.status_code, round(backoff, 2)))
+                time.sleep(backoff)
+                continue
+
+            # Success or non-retryable status: let the caller inspect status_code.
+            return response
+
+        raise RuntimeError('Webex API Request failed after {} attempts: {}'.format(MAX_ATTEMPTS, url))

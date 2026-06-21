@@ -81,15 +81,15 @@ Lastly, once all Workspace Metrics have been collected, the script saves the exp
 
 ### Installation Steps:
 
-1.  Close this repo:
+1.  Clone this repo:
     ```sh
     git clone https://github.com/wxsd-sales/workspace-metrics-exporter.git
     ```
-2.  Insert project requirements:
+2.  Install project requirements:
     ```sh
     pip3 install -r requirements.txt
     ```
-3. Rename ``.env.example`` to ``.env`` and add your Workspace Integration Client ID, Secret & JSON Web Token (JWT)
+3.  Rename ``.env.example`` to ``.env`` and add your Workspace Integration Client ID, Secret & JSON Web Token (JWT)
     ```
     CLIENT_ID=""
     CLIENT_SECRET=""

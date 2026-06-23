@@ -12,15 +12,11 @@ args = CONSOLE_ARGS
 if(args.start > args.end):
     sys.exit('To Timestamp can\'t be greater than the From timestamp')
 
-timeRange = args.end - args.start
-
-print(args)
-
 load_dotenv()
 
 # Create export filename and directory
 reportDataTime = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-output_file = 'workspace-metrics-'+args.metricName+'-'+args.value+'-'+reportDataTime+'.csv'
+output_file = 'workspace-metrics-'+args.metricName+'-'+args.aggregation+'-'+reportDataTime+'.csv'
 output_dir = Path('./exports')
 output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -28,9 +24,6 @@ output_dir.mkdir(parents=True, exist_ok=True)
 clientId = os.getenv("CLIENT_ID")
 clientSecret = os.getenv("CLIENT_SECRET")
 jwt = os.getenv("JWT") 
-
-
-
 
 
 # Construct Workspace Integration connection

@@ -36,6 +36,7 @@
         };
 
         apply();
+        window.addEventListener("hashchange", apply);
         window
           .matchMedia("(prefers-color-scheme: dark)")
           .addEventListener("change", () => {
@@ -77,87 +78,168 @@
         <span class="app-header__product">Workspace Metrics Exporter</span>
       </div>
       <div class="app-header__actions">
-        <button
-              id="theme-select-button"
-              class="secondary-button"
+        <div class="theme-select" id="theme-select" data-open="false">
+          <button
+            id="theme-select-button"
+            class="secondary-button theme-select-button"
+            type="button"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+          >
+            <span
+              id="theme-select-current-icon"
+              class="icon icon-laptop-regular theme-select-current-icon"
+              aria-hidden="true"
+            ></span>
+            <span id="theme-select-label">System</span>
+            <span
+              class="icon icon-arrow-triangle-down-filled theme-select-caret"
+              aria-hidden="true"
+            ></span>
+          </button>
+          <div
+            id="theme-select-menu"
+            class="theme-select-menu"
+            role="listbox"
+            aria-label="Theme"
+            hidden
+          >
+            <button
+              class="theme-select-option"
               type="button"
-              aria-haspopup="listbox"
-              aria-expanded="false"
+              role="option"
+              data-theme-choice="system"
+              aria-selected="true"
             >
-              <span
-                id="theme-select-current-icon"
-                class="theme-select-current-icon"
-                aria-hidden="true"
-              ></span>
-              <span id="theme-select-label">System</span>
-              <span
-                class="momentum-icon icon icon-arrow-triangle-down-filled"
-                aria-hidden="true"
-              ></span>
+              <span class="icon icon-laptop-regular" aria-hidden="true"></span>
+              <span>System</span>
             </button>
-            <div
-              id="theme-select-menu"
-              class="theme-select-menu"
-              role="listbox"
-              hidden
+            <button
+              class="theme-select-option"
+              type="button"
+              role="option"
+              data-theme-choice="light"
+              aria-selected="false"
             >
-              <button
-                class="theme-select-option"
-                type="button"
-                role="option"
-                data-theme-choice="system"
-              >
-                <span
-                  class="icon icon-laptop-regular"
-                  aria-hidden="true"
-                ></span>
-                <span>System</span>
-              </button>
-              <button
-                class="theme-select-option"
-                type="button"
-                role="option"
-                data-theme-choice="light"
-              >
-                <span
-                  class="momentum-icon icon icon-brightness-high-filled"
-                  aria-hidden="true"
-                ></span>
-                <span>Light</span>
-              </button>
-              <button
-                class="theme-select-option"
-                type="button"
-                role="option"
-                data-theme-choice="dark"
-              >
-                <span
-                  class="momentum-icon icon icon-quiet-hours-presence-filled"
-                  aria-hidden="true"
-                ></span>
-                <span>Dark</span>
-              </button>
+              <span
+                class="icon icon-brightness-high-filled"
+                aria-hidden="true"
+              ></span>
+              <span>Light</span>
+            </button>
+            <button
+              class="theme-select-option"
+              type="button"
+              role="option"
+              data-theme-choice="dark"
+              aria-selected="false"
+            >
+              <span
+                class="icon icon-quiet-hours-presence-filled"
+                aria-hidden="true"
+              ></span>
+              <span>Dark</span>
+            </button>
+          </div>
+        </div>
       </div>
     </header>
 
     <main class="app-main" aria-labelledby="pageTitle">
       <div class="app-content">
+        <div class="tab-bar" role="tablist" aria-label="Webapp functions">
+          <button
+            class="tab"
+            id="tab-manifest"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            aria-controls="manifest-generator"
+            data-tab-target="manifest-generator"
+          >
+            <span class="icon icon-document-bold" aria-hidden="true"></span>
+            <span class="tab__label">Manifest Generator</span>
+          </button>
+          <button
+            class="tab"
+            id="tab-cli"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="cli-generator"
+            tabindex="-1"
+            data-tab-target="cli-generator"
+          >
+            <span class="icon icon-file-code-bold" aria-hidden="true"></span>
+            <span class="tab__label">CLI Generator</span>
+          </button>
+        </div>
         <div class="page-stack" aria-live="polite">
-          <section class="step-card" data-step="signin">
+          <section
+            class="webapp-function"
+            id="manifest-generator"
+            role="tabpanel"
+            aria-labelledby="tab-manifest"
+            tabindex="0"
+          >
             <h2>Quick Manifest Generator</h2>
             <p>
-              This web app will generate a manifest file for your workspace.
+              Easily generate a Workspace Integration manifest file for this Workspace Metrics Exporter with all required Webex API scropes.
             </p>
-            <form>
-                <label for="displayName">Intregation Name:</label><br>
-                <input type="text" id="displayName" name="displayName"><br>
-                <label for="contactEmail">Contact Email:</label><br>
-                <input type="email" id="contactEmail" name="contactEmail"><br>
-                <label for="vendor">Vendor Name:</label><br>
-                <input type="text" id="vendor" name="vendor"><br>
-                <label for="description">Description:</label><br>
-                <input type="textarea" id="description" name="description"><br>
-              </form>
+            <p>
+              Optional: You can customize integration name, contact email, vendor name and description.
+            </p>
+            <form class="manifest-form">
+              <div class="field">
+                <label class="field__label" for="displayName"
+                  >Integration Name</label
+                >
+                <input
+                  class="field__input"
+                  type="text"
+                  id="displayName"
+                  name="displayName"
+                  autocomplete="off"
+                  placeholder="My Workspace Integration"
+                />
+              </div>
+              <div class="field">
+                <label class="field__label" for="contactEmail"
+                  >Contact Email</label
+                >
+                <input
+                  class="field__input"
+                  type="email"
+                  id="contactEmail"
+                  name="contactEmail"
+                  autocomplete="email"
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div class="field">
+                <label class="field__label" for="vendor">Vendor Name</label>
+                <input
+                  class="field__input"
+                  type="text"
+                  id="vendor"
+                  name="vendor"
+                  autocomplete="organization"
+                  placeholder="Your organization"
+                />
+              </div>
+              <div class="field">
+                <label class="field__label" for="description"
+                  >Description</label
+                >
+                <textarea
+                  class="field__input field__input--textarea"
+                  id="description"
+                  name="description"
+                  rows="3"
+                  placeholder="Briefly describe what this integration does"
+                ></textarea>
+              </div>
+            </form>
 
             <div class="step-actions">
               <button
@@ -171,6 +253,219 @@
                 ></span>
                 <span class="icon-button__label">Generate Manifest</span>
               </button>
+            </div>
+          </section>
+          <section
+            class="webapp-function"
+            id="cli-generator"
+            role="tabpanel"
+            aria-labelledby="tab-cli"
+            tabindex="0"
+            hidden
+          >
+            <h2>CLI Generator</h2>
+            <p>
+              Build a ready-to-run <code>workspace.py</code> command by choosing
+              a metric, time range and aggregation. The command updates
+              automatically as you make changes.
+            </p>
+            <form class="manifest-form" id="cli-form">
+              <div class="field">
+                <label class="field__label" id="cliMetricLabel"
+                  >Metric Name</label
+                >
+                <div class="md-select" id="cliMetricSelect" data-open="false">
+                  <button
+                    class="field__input md-select__trigger"
+                    type="button"
+                    id="cliMetricTrigger"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                    aria-labelledby="cliMetricLabel"
+                  >
+                    <span class="md-select__value" data-md-value
+                      >Sound Level</span
+                    >
+                    <span
+                      class="icon icon-arrow-triangle-down-filled md-select__caret"
+                      aria-hidden="true"
+                    ></span>
+                  </button>
+                  <div
+                    class="md-select__menu"
+                    role="listbox"
+                    aria-label="Metric Name"
+                    hidden
+                  >
+                    <button
+                      class="md-select__option"
+                      type="button"
+                      role="option"
+                      data-value="soundlevel"
+                      aria-selected="true"
+                    >
+                      Sound Level
+                    </button>
+                    <button
+                      class="md-select__option"
+                      type="button"
+                      role="option"
+                      data-value="ambientnoise"
+                      aria-selected="false"
+                    >
+                      Ambient Noise
+                    </button>
+                    <button
+                      class="md-select__option"
+                      type="button"
+                      role="option"
+                      data-value="temperature"
+                      aria-selected="false"
+                    >
+                      Temperature
+                    </button>
+                    <button
+                      class="md-select__option"
+                      type="button"
+                      role="option"
+                      data-value="humidity"
+                      aria-selected="false"
+                    >
+                      Humidity
+                    </button>
+                    <button
+                      class="md-select__option"
+                      type="button"
+                      role="option"
+                      data-value="tvoc"
+                      aria-selected="false"
+                    >
+                      TVOC (Air Quality)
+                    </button>
+                    <button
+                      class="md-select__option"
+                      type="button"
+                      role="option"
+                      data-value="peoplecount"
+                      aria-selected="false"
+                    >
+                      People Count
+                    </button>
+                    <button
+                      class="md-select__option"
+                      type="button"
+                      role="option"
+                      data-value="timeused"
+                      aria-selected="false"
+                    >
+                      Time Used
+                    </button>
+                    <button
+                      class="md-select__option"
+                      type="button"
+                      role="option"
+                      data-value="timebooked"
+                      aria-selected="false"
+                    >
+                      Time Booked
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field__label" id="cliAggregationLabel"
+                  >Aggregation</label
+                >
+                <div
+                  class="md-select"
+                  id="cliAggregationSelect"
+                  data-open="false"
+                >
+                  <button
+                    class="field__input md-select__trigger"
+                    type="button"
+                    id="cliAggregationTrigger"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                    aria-labelledby="cliAggregationLabel"
+                  >
+                    <span class="md-select__value" data-md-value>Hourly</span>
+                    <span
+                      class="icon icon-arrow-triangle-down-filled md-select__caret"
+                      aria-hidden="true"
+                    ></span>
+                  </button>
+                  <div
+                    class="md-select__menu"
+                    role="listbox"
+                    aria-label="Aggregation"
+                    hidden
+                  >
+                    <button
+                      class="md-select__option"
+                      type="button"
+                      role="option"
+                      data-value="none"
+                      aria-selected="false"
+                    >
+                      None
+                    </button>
+                    <button
+                      class="md-select__option"
+                      type="button"
+                      role="option"
+                      data-value="hourly"
+                      aria-selected="true"
+                    >
+                      Hourly
+                    </button>
+                    <button
+                      class="md-select__option"
+                      type="button"
+                      role="option"
+                      data-value="daily"
+                      aria-selected="false"
+                    >
+                      Daily
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field__label" for="cliFrom">From Date</label>
+                <input
+                  class="field__input"
+                  type="datetime-local"
+                  id="cliFrom"
+                  name="cliFrom"
+                  step="1"
+                />
+              </div>
+              <div class="field">
+                <label class="field__label" for="cliTo">To Date</label>
+                <input
+                  class="field__input"
+                  type="datetime-local"
+                  id="cliTo"
+                  name="cliTo"
+                  step="1"
+                />
+              </div>
+            </form>
+
+            <div class="cli-output">
+              <div class="cli-output__header">
+                <span class="field__label">Generated command</span>
+                <button
+                  id="cliCopyBtn"
+                  type="button"
+                  class="icon-button icon-button--with-label secondary-button"
+                >
+                  <span class="icon icon-copy-bold" aria-hidden="true"></span>
+                  <span class="icon-button__label">Copy</span>
+                </button>
+              </div>
+              <pre class="cli-output__command"><code id="cliCommand">python3 workspace.py soundlevel -a hourly</code></pre>
             </div>
           </section>
         </div>

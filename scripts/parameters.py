@@ -60,4 +60,3 @@ CONSOLE_ARGS =  _parse_arguments()
 
 # optional: delete function after use to prevent calling from other place
 del _parse_arguments
-

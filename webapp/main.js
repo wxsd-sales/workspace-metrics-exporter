@@ -62,3 +62,360 @@ function downloadManifest(data) {
     // 6. Free up the memory used by the Blob URL
     URL.revokeObjectURL(url);
   }
+
+
+/**
+ * Theme selector: toggles the menu and applies System / Light / Dark themes.
+ * Light/Dark are persisted via the URL hash (read by the inline boot script),
+ * while System clears the hash and follows the OS preference.
+ */
+(function initThemeSelect() {
+  const root = document.documentElement;
+  const select = document.getElementById("theme-select");
+  const button = document.getElementById("theme-select-button");
+  const menu = document.getElementById("theme-select-menu");
+  const label = document.getElementById("theme-select-label");
+  const currentIcon = document.getElementById("theme-select-current-icon");
+
+  if (!select || !button || !menu || !label || !currentIcon) {
+    return;
+  }
+
+  const options = Array.from(menu.querySelectorAll(".theme-select-option"));
+
+  const META = {
+    system: { label: "System", icon: "icon-laptop-regular" },
+    light: { label: "Light", icon: "icon-brightness-high-filled" },
+    dark: { label: "Dark", icon: "icon-quiet-hours-presence-filled" },
+  };
+  const ICON_CLASSES = Object.values(META).map((meta) => meta.icon);
+
+  const readChoice = () => {
+    const raw = window.location.hash.startsWith("#")
+      ? window.location.hash.slice(1)
+      : window.location.hash;
+    const theme = raw ? new URLSearchParams(raw).get("theme") : null;
+    return theme === "light" || theme === "dark" ? theme : "system";
+  };
+
+  const applyTheme = (choice) => {
+    const dark =
+      choice === "dark" ||
+      (choice === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+    root.classList.remove(
+      "mds-theme-stable-lightWebex",
+      "mds-theme-stable-darkWebex",
+    );
+    root.classList.add(
+      dark ? "mds-theme-stable-darkWebex" : "mds-theme-stable-lightWebex",
+    );
+    root.style.colorScheme = dark ? "dark" : "light";
+  };
+
+  const syncButton = (choice) => {
+    const meta = META[choice] || META.system;
+    label.textContent = meta.label;
+    currentIcon.classList.remove(...ICON_CLASSES);
+    currentIcon.classList.add(meta.icon);
+    options.forEach((option) => {
+      option.setAttribute(
+        "aria-selected",
+        String(option.dataset.themeChoice === choice),
+      );
+    });
+  };
+
+  const setChoice = (choice) => {
+    if (choice === "system") {
+      // Drop the hash entirely so the OS preference is followed.
+      history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      );
+    } else {
+      window.location.hash = "theme=" + choice;
+    }
+    applyTheme(choice);
+    syncButton(choice);
+  };
+
+  const openMenu = () => {
+    menu.hidden = false;
+    select.dataset.open = "true";
+    button.setAttribute("aria-expanded", "true");
+  };
+
+  const closeMenu = () => {
+    menu.hidden = true;
+    select.dataset.open = "false";
+    button.setAttribute("aria-expanded", "false");
+  };
+
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (menu.hidden) {
+      openMenu();
+    } else {
+      closeMenu();
+    }
+  });
+
+  options.forEach((option) => {
+    option.addEventListener("click", () => {
+      setChoice(option.dataset.themeChoice);
+      closeMenu();
+      button.focus();
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!select.contains(event.target)) {
+      closeMenu();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !menu.hidden) {
+      closeMenu();
+      button.focus();
+    }
+  });
+
+  syncButton(readChoice());
+})();
+
+
+/**
+ * Tab list: toggles which webapp-function panel is visible.
+ * Manifest Generator is the default selected tab.
+ */
+(function initTabs() {
+  const tabs = Array.from(document.querySelectorAll(".tab"));
+  if (!tabs.length) {
+    return;
+  }
+
+  const activate = (tab) => {
+    tabs.forEach((current) => {
+      const selected = current === tab;
+      current.setAttribute("aria-selected", String(selected));
+      current.tabIndex = selected ? 0 : -1;
+      const panel = document.getElementById(current.dataset.tabTarget);
+      if (panel) {
+        panel.hidden = !selected;
+      }
+    });
+  };
+
+  tabs.forEach((tab, index) => {
+    tab.addEventListener("click", () => activate(tab));
+    tab.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") {
+        return;
+      }
+      event.preventDefault();
+      const direction = event.key === "ArrowRight" ? 1 : -1;
+      const next = tabs[(index + direction + tabs.length) % tabs.length];
+      next.focus();
+      activate(next);
+    });
+  });
+})();
+
+
+/**
+ * Wires a Momentum-styled .md-select dropdown.
+ * @param {string} rootId - id of the .md-select container
+ * @param {(value: string) => void} [onChange] - called when the value changes
+ * @returns {{ options: HTMLButtonElement[], getValue: () => string|null, setValue: (value: string, fire?: boolean) => void } | null}
+ */
+function createMdSelect(rootId, onChange) {
+  const root = document.getElementById(rootId);
+  if (!root) {
+    return null;
+  }
+
+  const trigger = root.querySelector(".md-select__trigger");
+  const valueEl = root.querySelector("[data-md-value]");
+  const menu = root.querySelector(".md-select__menu");
+  const options = Array.from(root.querySelectorAll(".md-select__option"));
+
+  const open = () => {
+    menu.hidden = false;
+    root.dataset.open = "true";
+    trigger.setAttribute("aria-expanded", "true");
+  };
+  const close = () => {
+    menu.hidden = true;
+    root.dataset.open = "false";
+    trigger.setAttribute("aria-expanded", "false");
+  };
+
+  const getValue = () => {
+    const selected = options.find(
+      (option) => option.getAttribute("aria-selected") === "true",
+    );
+    return selected ? selected.dataset.value : null;
+  };
+
+  const setValue = (value, fire = true) => {
+    let matched = null;
+    options.forEach((option) => {
+      const isSelected = option.dataset.value === value;
+      option.setAttribute("aria-selected", String(isSelected));
+      if (isSelected) {
+        matched = option;
+      }
+    });
+    if (matched) {
+      valueEl.textContent = matched.textContent.trim();
+    }
+    if (fire && typeof onChange === "function") {
+      onChange(getValue());
+    }
+  };
+
+  trigger.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (menu.hidden) {
+      open();
+    } else {
+      close();
+    }
+  });
+
+  options.forEach((option) => {
+    option.addEventListener("click", () => {
+      if (option.disabled) {
+        return;
+      }
+      setValue(option.dataset.value);
+      close();
+      trigger.focus();
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!root.contains(event.target)) {
+      close();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !menu.hidden) {
+      close();
+      trigger.focus();
+    }
+  });
+
+  return { options, getValue, setValue };
+}
+
+
+/**
+ * CLI Generator: builds a `python3 workspace.py` command from the selected
+ * metric, aggregation and time range. Updates live on any change.
+ */
+(function initCliGenerator() {
+  const commandEl = document.getElementById("cliCommand");
+  const fromInput = document.getElementById("cliFrom");
+  const toInput = document.getElementById("cliTo");
+  const copyBtn = document.getElementById("cliCopyBtn");
+
+  if (!commandEl || !fromInput || !toInput) {
+    return;
+  }
+
+  // Metrics whose CLI subparser does not accept the "none" aggregation.
+  const NO_NONE_AGGREGATION = new Set(["timeused", "timebooked"]);
+
+  const metricSelect = createMdSelect("cliMetricSelect", () => {
+    syncAggregationOptions();
+    buildCommand();
+  });
+  const aggregationSelect = createMdSelect("cliAggregationSelect", buildCommand);
+
+  if (!metricSelect || !aggregationSelect) {
+    return;
+  }
+
+  // Convert a datetime-local value (YYYY-MM-DDTHH:MM[:SS]) to the
+  // ISO-with-Z format the CLI expects (YYYY-MM-DDTHH:MM:SSZ).
+  const toCliDate = (raw) => {
+    if (!raw) {
+      return null;
+    }
+    const [date, time = ""] = raw.split("T");
+    const [hh = "00", mm = "00", ss = "00"] = time.split(":");
+    return `${date}T${hh}:${mm}:${ss}Z`;
+  };
+
+  function syncAggregationOptions() {
+    const metric = metricSelect.getValue();
+    const noneOption = aggregationSelect.options.find(
+      (option) => option.dataset.value === "none",
+    );
+    if (!noneOption) {
+      return;
+    }
+
+    const disallowed = NO_NONE_AGGREGATION.has(metric);
+    noneOption.disabled = disallowed;
+    noneOption.hidden = disallowed;
+
+    if (disallowed && aggregationSelect.getValue() === "none") {
+      aggregationSelect.setValue("hourly", false);
+    }
+  }
+
+  function buildCommand() {
+    const metric = metricSelect.getValue();
+    const aggregation = aggregationSelect.getValue();
+
+    let command = `python3 workspace.py ${metric} -a ${aggregation}`;
+
+    const from = toCliDate(fromInput.value);
+    const to = toCliDate(toInput.value);
+    if (from) {
+      command += ` -f ${from}`;
+    }
+    if (to) {
+      command += ` -t ${to}`;
+    }
+
+    commandEl.textContent = command;
+  }
+
+  fromInput.addEventListener("input", buildCommand);
+  toInput.addEventListener("input", buildCommand);
+
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(commandEl.textContent);
+      } catch (error) {
+        return;
+      }
+
+      const label = copyBtn.querySelector(".icon-button__label");
+      const icon = copyBtn.querySelector(".icon");
+      const previousLabel = label.textContent;
+
+      label.textContent = "Copied";
+      icon.classList.remove("icon-copy-bold");
+      icon.classList.add("icon-check-circle-bold");
+
+      window.setTimeout(() => {
+        label.textContent = previousLabel;
+        icon.classList.remove("icon-check-circle-bold");
+        icon.classList.add("icon-copy-bold");
+      }, 1600);
+    });
+  }
+
+  syncAggregationOptions();
+  buildCommand();
+})();
